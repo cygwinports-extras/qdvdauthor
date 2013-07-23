@@ -1,0 +1,22 @@
+--- origsrc/qdvdauthor-2.3.1/qdvdauthor/qplayer/engines/kxinewidget.cpp	2013-04-05 05:36:00.941632900 -0500
++++ src/qdvdauthor-2.3.1/qdvdauthor/qplayer/engines/kxinewidget.cpp	2013-07-22 02:10:16.363249800 -0500
+@@ -2501,7 +2501,7 @@ bool KXineWidget::getAutoplayPluginURLS(
+ #if MYXINE_VERSION_CODE < 10200
+ 	urls = xine_get_autoplay_mrls(m_xineEngine, plugin.ascii(), &num);
+ #else
+-	urls = xine_get_autoplay_mrls(m_xineEngine, plugin.ascii(), &num);
++	urls = const_cast<char **>(xine_get_autoplay_mrls(m_xineEngine, plugin.ascii(), &num));
+ #endif
+ 
+ 	if (urls)
+--- origsrc/qdvdauthor-2.3.1/qdvdauthor/qplayer/engines/qxinewidget.cpp	2013-04-05 05:36:00.946632100 -0500
++++ src/qdvdauthor-2.3.1/qdvdauthor/qplayer/engines/qxinewidget.cpp	2013-07-22 02:09:18.505940600 -0500
+@@ -1407,7 +1407,7 @@ bool QXineWidget::GetAutoplayPluginMrl(c
+   int num;
+   int i = 0;
+ 
+-  mrls = xine_get_autoplay_mrls(xineEngine, plugin, &num);
++  mrls = const_cast<char **>(xine_get_autoplay_mrls(xineEngine, plugin, &num));
+ 
+   if (mrls)
+   {

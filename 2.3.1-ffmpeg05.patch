@@ -1,0 +1,101 @@
+QDVDAuthor is not compatible with recent versions of ffmpeg
+
+--- origsrc/qdvdauthor-2.3.1/qrender/ffmpeg-0.5.12.patch	1969-12-31 18:00:00.000000000 -0600
++++ src/qdvdauthor-2.3.1/qrender/ffmpeg-0.5.12.patch	2013-07-23 01:37:33.788794300 -0500
+@@ -0,0 +1,54 @@
++--- ffmpeg-0.5.12.orig/libavutil/bswap.h	2013-02-27 21:30:56.000000000 -0600
+++++ ffmpeg-0.5.12/libavutil/bswap.h	2013-07-23 01:36:50.563322000 -0500
++@@ -41,6 +41,7 @@
++ #endif
++ 
++ #ifndef bswap_16
+++#define bswap_16 av_bswap16
++ static av_always_inline av_const uint16_t bswap_16(uint16_t x)
++ {
++     x= (x>>8) | (x<<8);
++@@ -49,6 +50,7 @@
++ #endif
++ 
++ #ifndef bswap_32
+++#define bswap_32 av_bswap32
++ static av_always_inline av_const uint32_t bswap_32(uint32_t x)
++ {
++     x= ((x<<8)&0xFF00FF00) | ((x>>8)&0x00FF00FF);
++@@ -58,6 +60,7 @@
++ #endif
++ 
++ #ifndef bswap_64
+++#define bswap_64 av_bswap64
++ static inline uint64_t av_const bswap_64(uint64_t x)
++ {
++ #if 0
++--- ffmpeg-0.5.12.orig/libavutil/x86/bswap.h	2013-02-27 21:30:56.000000000 -0600
+++++ ffmpeg-0.5.12/libavutil/x86/bswap.h	2013-07-23 01:21:49.875805600 -0500
++@@ -28,14 +28,14 @@
++ #include "config.h"
++ #include "libavutil/common.h"
++ 
++-#define bswap_16 bswap_16
+++#define bswap_16 av_bswap16
++ static av_always_inline av_const uint16_t bswap_16(uint16_t x)
++ {
++     __asm__("rorw $8, %0" : "+r"(x));
++     return x;
++ }
++ 
++-#define bswap_32 bswap_32
+++#define bswap_32 av_bswap32
++ static av_always_inline av_const uint32_t bswap_32(uint32_t x)
++ {
++ #if HAVE_BSWAP
++@@ -50,7 +50,7 @@
++ }
++ 
++ #if ARCH_X86_64
++-#define bswap_64 bswap_64
+++#define bswap_64 av_bswap64
++ static inline uint64_t av_const bswap_64(uint64_t x)
++ {
++     __asm__("bswap  %0": "=r" (x) : "0" (x));
+--- origsrc/qdvdauthor-2.3.1/qrender/local_ffmpeg.sh	2013-04-05 05:36:01.041615300 -0500
++++ src/qdvdauthor-2.3.1/qrender/local_ffmpeg.sh	2013-07-23 01:06:52.393472500 -0500
+@@ -120,11 +120,8 @@ if [ "x$STATIC_FFMPEG" == "x" ] || [ "x$
+   exit 0
+ fi;
+ 
+-# The 0.5 release from March 2009
+-# theLib="http://ffmpeg.mplayerhq.hu/releases/ffmpeg-0.5.tar.bz2"
+-
+-# Or the latest source from svn/git
+-theLib="http://ffmpeg.mplayerhq.hu/releases/ffmpeg-snapshot.tar.bz2"
++# Latest release which is compatible with QRender
++theLib="http://ffmpeg.org/releases/ffmpeg-0.5.12.tar.bz2"
+ theFile=`basename $theLib`
+ 
+ echo
+@@ -205,6 +202,9 @@ else
+   if [ "xffmpeg" != x"$extractDir" ]; then
+     ln -s "$extractDir" ffmpeg
+   fi;
++  if [[ -e $extractDir.patch ]]; then
++    pushd $extractDir; patch -p1 < ../$extractDir.patch; popd
++  fi;
+ fi;
+ 
+ cd ffmpeg
+--- origsrc/qdvdauthor-2.3.1/qrender/qrender.pro	2013-04-05 05:36:01.041615300 -0500
++++ src/qdvdauthor-2.3.1/qrender/qrender.pro	2013-07-23 01:52:46.377991400 -0500
+@@ -110,6 +110,13 @@ z         = $$findLib( z         )
+   avcore = $$avcore
+ } 
+ 
++cygwin-g++ {
++  bz2 = -lbz2
++  theora = -ltheora
++  vorbisenc = -lvorbisenc
++  z = -lz
++}
++
+ message ( Z = $$z )
+ message ( VA = $$va )
+ message ( BZ2 = $$bz2 )

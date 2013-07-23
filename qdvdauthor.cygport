@@ -1,0 +1,43 @@
+inherit qt3
+
+NAME="qdvdauthor"
+VERSION=2.3.1
+RELEASE=1
+CATEGORY="Video"
+SUMMARY="Creates DVDs from videos and pictures"
+DESCRIPTION="'Q' DVD-Author is a GUI frontend for dvdauthor and other related
+tools."
+HOMEPAGE="http://qdvdauthor.sourceforge.net/"
+SRC_URI="mirror://sourceforge/qdvdauthor/qdvdauthor-${VERSION}.tar.gz"
+PATCH_URI="
+	2.3.1-cygwin-pthread.patch
+	2.3.1-libjhead.patch
+	2.3.1-xine12.patch
+	2.3.1-ffmpeg05.patch
+"
+
+PKG_NAMES="qdvdauthor qplayer"
+qdvdauthor_REQUIRES="dv2sub dvdauthor dvd-slideshow ffmpeg ImageMagick lame mplayer netpbm qplayer sox sox-fmt-ffmpeg toolame videotrans vorbis-tools"
+qdvdauthor_CONTENTS="--exclude=qplayer* usr/"
+qplayer_SUMMARY="Qt GUI for MPlayer and Xine"
+qplayer_REQUIRES="mplayer"
+qplayer_CONTENTS="usr/bin/qplayer.exe usr/share/applications/qplayer.desktop
+		  usr/share/qdvdauthor/qplayer_*"
+
+src_compile() {
+	lndirs
+	cd ${B}
+	./configure -n --prefix=${D}/usr --system-path=/usr
+}
+
+src_install() {
+	cd ${B}
+	./configure -n --install
+
+	exeinto /usr/lib/${NAME}
+	doexe lib/cygjhead-1.dll
+
+	doicon ${S}/qdvdauthor.png
+	make_desktop_entry qdvdauthor QDVDAuthor qdvdauthor "AudioVideo;Video;DiscBurning"
+	make_desktop_entry qplayer QPlayer qdvdauthor "AudioVideo;Video;Player"
+}

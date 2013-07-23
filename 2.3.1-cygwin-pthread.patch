@@ -1,0 +1,16 @@
+Cygwin pthread_t is a pointer, not a uint as in glibc
+
+--- origsrc/qdvdauthor-2.3.1/qrender/logger.h	2013-04-05 05:36:01.043615000 -0500
++++ src/qdvdauthor-2.3.1/qrender/logger.h	2013-07-22 02:37:19.886110000 -0500
+@@ -14,6 +14,11 @@
+ 
+ #include <QMutex>
+ 
++#ifdef __CYGWIN__
++extern "C" unsigned long pthread_getsequence_np (pthread_t *);
++#define pthread_self() (__extension__({pthread_t _p = pthread_self(); pthread_getsequence_np(&_p);}))
++#endif
++
+ #define MAX_LOG_LEN 4096
+ 
+ class QFile;

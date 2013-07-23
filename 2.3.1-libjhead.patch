@@ -1,0 +1,25 @@
+--- origsrc/qdvdauthor-2.3.1/addons/jhead/libjhead/interface.pro	2013-04-05 05:36:00.847649500 -0500
++++ src/qdvdauthor-2.3.1/addons/jhead/libjhead/interface.pro	2013-07-22 02:18:28.779414400 -0500
+@@ -11,7 +11,7 @@ HEADERS += library.h interface.h \
+   ../jhead.h
+ 
+ SOURCES += library.cpp \
+-  ../exif.c ../gpsinfo.c ../iptc.c ../jhead.c ../jpgfile.c ../makernote.c 
++  ../exif.c ../gpsinfo.c ../iptc.c ../jhead.c ../jpgfile.c ../makernote.c ../paths.c
+ 
+ WHICH_PREFIX = $$(PREFIX)
+ isEmpty( WHICH_PREFIX ) {
+--- origsrc/qdvdauthor-2.3.1/qdvdauthor/cachethumbs.cpp	2013-04-05 05:36:00.987624800 -0500
++++ src/qdvdauthor-2.3.1/qdvdauthor/cachethumbs.cpp	2013-07-22 03:38:19.802445300 -0500
+@@ -776,7 +776,11 @@ bool Thumbs::loadPlugin ( )
+   m_pDestroyFunction = NULL;
+   m_pPlugin          = NULL;
+ 
++#ifdef Q_OS_CYGWIN
++  QString  qsFilePath ( Global::qsSystemPath + "/lib/qdvdauthor/cygjhead-1.dll" );
++#else
+   QString  qsFilePath ( Global::qsSystemPath + "/share/qdvdauthor/lib/libjhead.so" );
++#endif
+   m_pLibrary = dlopen ( qsFilePath.ascii ( ), RTLD_LAZY );
+   if ( ! m_pLibrary ) {
+     printf ( "Fatal: Cannot load library <%s>\n       %s\n", qsFilePath.ascii ( ), dlerror ( ) );
